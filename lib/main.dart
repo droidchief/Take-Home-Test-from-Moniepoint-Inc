@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:monie_point_flutter_test/features/widgets/bottom_nav.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
 
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
       ),
-      home: Text("Hello Monie Point"),
+      home: BottomNav(),
     );
   }
 }
