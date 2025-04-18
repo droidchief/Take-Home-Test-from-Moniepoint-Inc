@@ -13,7 +13,6 @@ class BottomNav extends StatefulWidget {
 }
 
 class _BottomNavState extends State<BottomNav> {
-
   List<Widget> pages = [
     SearchPage(),
     Text("Chats"),
@@ -24,54 +23,81 @@ class _BottomNavState extends State<BottomNav> {
 
   int selectedNavIndex = 2;
 
+  Color getBottomBarColor(int page) {
+    switch(page) {
+      case 0:
+        return ColorPalette().black;
+      case 2:
+        return ColorPalette().warmPeach;
+    }
+
+    return ColorPalette().black;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(child: pages[selectedNavIndex],),
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          height: 66,
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          margin: EdgeInsets.symmetric(horizontal: 70),
-          decoration: BoxDecoration(
-            color: ColorPalette().background,
-            borderRadius: BorderRadius.circular(40),
-            boxShadow: [
-              BoxShadow(
-                color: ColorPalette().background.withOpacity(0.3),
-                offset: Offset(0, 20),
-                blurRadius: 20,
-              ),
-            ],
+      backgroundColor: getBottomBarColor(selectedNavIndex),
+      body: Stack(
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height,
+            child: pages[selectedNavIndex],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(
-              bottomNavItems.length,
-                  (index) =>
-                  GestureDetector(
-                    onTap: () {
-                      selectedNavIndex = index;
-                      setState(() {});
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
+
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 25), // Adjust this for desired position from bottom
+              child: Container(
+                height: 66,
+                margin: EdgeInsets.symmetric(horizontal: 50),
+                decoration: BoxDecoration(
+                  color: ColorPalette().background,
+                  borderRadius: BorderRadius.circular(40),
+                  boxShadow: [
+                    BoxShadow(
+                      color: ColorPalette().background.withOpacity(0.3),
+                      offset: Offset(0, 20),
+                      blurRadius: 20,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(
+                    bottomNavItems.length,
+                        (index) => GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedNavIndex = index;
+                        });
+                      },
+                      child: Container(
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
                           color: selectedNavIndex == index
-                              ? ColorPalette().activeNavIcon
-                              : ColorPalette().inActiveNavIcon ,
-                          shape: BoxShape.circle
-                      ),
-                      height: selectedNavIndex == index ? 50 : 40,
-                      width: selectedNavIndex == index ? 50 : 40,
-                      child: Icon(
-                        bottomNavItems[index].icon,
-                        color: Colors.white, size: 20,
+                              ? ColorPalette().secondaryColor
+                              : ColorPalette().inActiveNavIcon,
+                          shape: BoxShape.circle,
+                        ),
+                        height: selectedNavIndex == index ? 50 : 40,
+                        width: selectedNavIndex == index ? 50 : 40,
+                        child: Icon(
+                          bottomNavItems[index].icon,
+                          color: ColorPalette().white,
+                          size: selectedNavIndex == index ? 24 : 20,
+                        ),
                       ),
                     ),
                   ),
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
