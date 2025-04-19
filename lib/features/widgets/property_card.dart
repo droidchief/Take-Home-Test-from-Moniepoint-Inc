@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 
 import 'address_label.dart';
+
 class PropertyCard extends StatelessWidget {
   final String imageAsset;
   final String address;
   final double height;
+  final bool isAddressCenter;
+
 
   const PropertyCard({
-    Key? key,
+    super.key,
     required this.imageAsset,
     required this.address,
     required this.height,
-  }) : super(key: key);
+    this.isAddressCenter = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +33,8 @@ class PropertyCard extends StatelessWidget {
         children: [
           Align(
             alignment: Alignment.bottomCenter,
-            child: AddressLabel(address: address),
-          )
+            child: AddressLabel(address: address, isCenter: isAddressCenter,),
+          ),
         ],
       ),
     );

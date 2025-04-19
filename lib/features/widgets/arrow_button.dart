@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/color_palette.dart';
 class ArrowButton extends StatelessWidget {
-  const ArrowButton({Key? key}) : super(key: key);
+  const ArrowButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class ArrowButton extends StatelessWidget {
           BoxShadow(
             color: ColorPalette().darkGray,
             blurRadius: 25,
-            offset: const Offset(-20, 5),
+            offset: const Offset(-15, 5),
           ),
         ],
       ),

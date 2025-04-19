@@ -235,6 +235,7 @@ class _HomePageState extends State<HomePage> {
                       imageAsset: "assets/images/random_image_1.png",
                       address: "Gladkova St., 25",
                       height: 200,
+                      isAddressCenter: true,
                     ),
                     const Gap(10),
 
@@ -243,7 +244,7 @@ class _HomePageState extends State<HomePage> {
                         Expanded(
                           flex: 1,
                           child: PropertyCard(
-                            imageAsset: "assets/images/random_image_1.png",
+                            imageAsset: "assets/images/random_image_2.png",
                             address: "Gubina St., 11",
                             height: 350,
                           ),
@@ -254,13 +255,13 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             children: [
                               PropertyCard(
-                                imageAsset: "assets/images/random_image_1.png",
+                                imageAsset: "assets/images/random_image_3.png",
                                 address: "Trefoleva St., 43",
                                 height: 170,
                               ),
                               const Gap(10),
                               PropertyCard(
-                                imageAsset: "assets/images/random_image_1.png",
+                                imageAsset: "assets/images/random_image_4.png",
                                 address: "Sedova St., 22",
                                 height: 170,
                               ),
