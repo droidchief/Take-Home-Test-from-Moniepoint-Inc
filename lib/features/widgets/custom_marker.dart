@@ -138,7 +138,7 @@ class _CustomMarkerState extends State<CustomMarker>
                     style: GoogleFonts.manrope(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: ColorPalette().beige,
+                      color: ColorPalette().darkBeige,
                     ),
                   ),
                 )
@@ -146,7 +146,7 @@ class _CustomMarkerState extends State<CustomMarker>
                     : Icon(
                   Icons.apartment,
                   key: const ValueKey('icon'),
-                  color: ColorPalette().beige,
+                  color: ColorPalette().darkBeige,
                   size: 20,
                 ),
               ),

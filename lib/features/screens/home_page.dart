@@ -13,7 +13,123 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin, WidgetsBindingObserver {
+  late AnimationController _profileEntryController;
+  late AnimationController _dashboardEntryController;
+  late AnimationController _locationBarExpandController;
+  late AnimationController _locationIconController;
+  late AnimationController _welcomeTextController;
+
+  late Animation<double> _profileScaleAnimation;
+  late Animation<double> _dashboardScaleAnimation;
+  late Animation<double> _locationBarWidthAnimation;
+  late Animation<double> _locationContentFadeAnimation;
+  late Animation<double> _welcomeTextFadeAnimation;
+  late Animation<Offset> _welcomeTextSlideAnimation;
+  late Animation<double> _welcomeTextRevealAnimation;
+
+
+  @override
+  void initState() {
+    _profileEntryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _dashboardEntryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _profileScaleAnimation = CurvedAnimation(
+      parent: _profileEntryController,
+      curve: Curves.easeOutCubic,
+    );
+
+    _dashboardScaleAnimation = CurvedAnimation(
+      parent: _dashboardEntryController,
+      curve: Curves.easeOutCubic,
+    );
+
+    _locationBarExpandController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _locationBarWidthAnimation = Tween<double>(begin: 0, end: 180).animate(
+      CurvedAnimation(
+        parent: _locationBarExpandController,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    _locationIconController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    // Fade-in animation (opacity goes from 0 to 1)
+    _locationContentFadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _locationIconController,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    _welcomeTextController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _welcomeTextFadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _welcomeTextController,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    _welcomeTextSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, 2),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _welcomeTextController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+
+    _welcomeTextRevealAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _welcomeTextController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback( (_) {
+      _profileEntryController.forward();
+      // Start the width animation
+      _locationBarExpandController.forward().then((_) {
+        _locationIconController.forward().then((_) {
+          _welcomeTextController.forward();
+          _dashboardEntryController.forward();
+        });
+      });
+
+    });
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _profileEntryController.dispose();
+    _locationBarExpandController.dispose();
+    _locationIconController.dispose();
+    _welcomeTextController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,112 +156,160 @@ class _HomePageState extends State<HomePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          height: 50,
-                          decoration: BoxDecoration(
-                              color: ColorPalette().white,
-                              borderRadius: BorderRadius.circular(10)
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Iconsax.location, size: 20, color: ColorPalette().lightBrown),
-                              const Gap(3),
-                              Text(
-                                "Saint Petersburg",
-                                style: GoogleFonts.manrope(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                  color: ColorPalette().lightBrown,
+                        AnimatedBuilder(
+                          animation: _locationBarExpandController,
+                          builder: (context, child) {
+                            return ClipRect(
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: _locationBarWidthAnimation.value / 180,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: ColorPalette().white,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      FadeTransition(
+                                        opacity: _locationContentFadeAnimation,
+                                        child: Icon(Iconsax.location, size: 20, color: ColorPalette().lightBrown),
+                                      ),
+                                      const Gap(3),
+                                      FadeTransition(
+                                        opacity: _locationContentFadeAnimation,
+                                        child: Text(
+                                          "Saint Petersburg",
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w800,
+                                            color: ColorPalette().lightBrown,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
-                              )
-                            ],
-                          ),
+                              ),
+                            );
+                          },
                         ),
-                        Container(
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: ColorPalette().lightBrown,
-                            image: DecorationImage(image: AssetImage("assets/images/profile.png"))
+
+                        ScaleTransition(
+                          scale: _profileScaleAnimation,
+                          child: Container(
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: ColorPalette().lightBrown,
+                              image: DecorationImage(image: AssetImage("assets/images/profile.png"))
+                            ),
                           ),
                         )
                       ],
                     ),
                     const Gap(40),
-                    Text(
-                      "Hi, Marina",
-                      style: GoogleFonts.manrope(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                        color: ColorPalette().lightBrown,
+                    FadeTransition(
+                      opacity: _welcomeTextFadeAnimation,
+                      child: Text(
+                        "Hi, Marina",
+                        style: GoogleFonts.manrope(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: ColorPalette().lightBrown,
+                        ),
                       ),
                     ),
-                    Text(
-                      "let's select your \nperfect place",
-                      style: GoogleFonts.manrope(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w500,
-                          color: ColorPalette().black,
-                          height: 0
+                    SizedBox(
+                      height: 100,
+                      child: FadeTransition(
+                        opacity: _welcomeTextFadeAnimation,
+                        child: SlideTransition(
+                          position: _welcomeTextSlideAnimation,
+                          child: AnimatedBuilder(
+                            animation: _welcomeTextRevealAnimation,
+                            builder: (context, child) {
+                              return ClipRect(
+                                child: Align(
+                                  alignment: Alignment.topLeft, // Change from bottomLeft to topLeft
+                                  heightFactor: _welcomeTextRevealAnimation.value,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "let's select your \nperfect place",
+                              style: GoogleFonts.manrope(
+                                fontSize: 36,
+                                fontWeight: FontWeight.w500,
+                                color: ColorPalette().black,
+                                height: 0,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                    const Gap(50),
+                    const Gap(40),
                     Row(
                       children: [
                         Expanded(
                           flex: 1,
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: ColorPalette().secondaryColor,
-                              ),
-                              child: Stack(
-                                children: [
-                                  Positioned(
-                                    top: 20,
-                                    left: 0,
-                                    right: 0,
-                                    child: Text(
-                                      "BUY",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                        color: ColorPalette().warmPeach,
+                          child: ScaleTransition(
+                            scale: _dashboardScaleAnimation,
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: ColorPalette().secondaryColor,
+                                ),
+                                child: Stack(
+                                  children: [
+                                    Positioned(
+                                      top: 20,
+                                      left: 0,
+                                      right: 0,
+                                      child: Text(
+                                        "BUY",
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          color: ColorPalette().warmPeach,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Center(
-                                    child: RichText(
-                                      textAlign: TextAlign.center,
-                                      text: TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: "1034\n",
-                                            style: GoogleFonts.manrope(
-                                              fontSize: 40,
-                                              fontWeight: FontWeight.w700,
-                                              color: ColorPalette().white,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: "offers",
-                                            style: GoogleFonts.poppins(
-                                                fontSize: 14,
+                                    Center(
+                                      child: RichText(
+                                        textAlign: TextAlign.center,
+                                        text: TextSpan(
+                                          children: [
+                                            TextSpan(
+                                              text: "1034\n",
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 40,
                                                 fontWeight: FontWeight.w700,
-                                                color: ColorPalette().warmPeach,
-                                                height: 0
+                                                color: ColorPalette().white,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                            TextSpan(
+                                              text: "offers",
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: ColorPalette().warmPeach,
+                                                  height: 0
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                ],
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -153,56 +317,59 @@ class _HomePageState extends State<HomePage> {
                         const Gap(10),
                         Expanded(
                           flex: 1,
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25),
-                                color: ColorPalette().offWhite,
-                              ),
-                              child: Stack(
-                                children: [
-                                  Positioned(
-                                    top: 20,
-                                    left: 0,
-                                    right: 0,
-                                    child: Text(
-                                      "RENT",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                        color: ColorPalette().lightBrown,
+                          child: ScaleTransition(
+                            scale: _dashboardScaleAnimation,
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                  color: ColorPalette().offWhite,
+                                ),
+                                child: Stack(
+                                  children: [
+                                    Positioned(
+                                      top: 20,
+                                      left: 0,
+                                      right: 0,
+                                      child: Text(
+                                        "RENT",
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          color: ColorPalette().lightBrown,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Center(
-                                    child: RichText(
-                                      textAlign: TextAlign.center,
-                                      text: TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: "2 212\n",
-                                            style: GoogleFonts.manrope(
-                                              fontSize: 40,
-                                              fontWeight: FontWeight.w700,
-                                              color: ColorPalette().lightBrown,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: "offers",
-                                            style: GoogleFonts.poppins(
-                                                fontSize: 14,
+                                    Center(
+                                      child: RichText(
+                                        textAlign: TextAlign.center,
+                                        text: TextSpan(
+                                          children: [
+                                            TextSpan(
+                                              text: "2 212\n",
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 40,
                                                 fontWeight: FontWeight.w700,
                                                 color: ColorPalette().lightBrown,
-                                                height: 0
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                            TextSpan(
+                                              text: "offers",
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: ColorPalette().lightBrown,
+                                                  height: 0
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                ],
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -215,8 +382,8 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           DraggableScrollableSheet(
-            initialChildSize: 0.35,
-            minChildSize: 0.35,
+            initialChildSize: 0.38,
+            minChildSize: 0.38,
             maxChildSize: 0.85,
             builder: (context, scrollController) {
               return Container(

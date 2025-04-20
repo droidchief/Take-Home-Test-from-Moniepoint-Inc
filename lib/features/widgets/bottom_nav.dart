@@ -12,7 +12,10 @@ class BottomNav extends StatefulWidget {
   State<BottomNav> createState() => _BottomNavState();
 }
 
-class _BottomNavState extends State<BottomNav> {
+class _BottomNavState extends State<BottomNav> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
+
   List<Widget> pages = [
     SearchPage(),
     Text("Chats"),
@@ -23,21 +26,37 @@ class _BottomNavState extends State<BottomNav> {
 
   int selectedNavIndex = 2;
 
-  Color getBottomBarColor(int page) {
-    switch(page) {
-      case 0:
-        return ColorPalette().black;
-      case 2:
-        return ColorPalette().warmPeach;
-    }
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
 
-    return ColorPalette().black;
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1), // start off-screen (bottom)
+      end: Offset.zero, // end at normal position
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    ));
+
+    // Start the animation when widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _animationController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: getBottomBarColor(selectedNavIndex),
       body: Stack(
         children: [
           SizedBox(
@@ -45,50 +64,54 @@ class _BottomNavState extends State<BottomNav> {
             child: pages[selectedNavIndex],
           ),
 
+          // Slide in Bottom Nav
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 35),
-              child: Container(
-                height: 66,
-                margin: EdgeInsets.symmetric(horizontal: 80),
-                decoration: BoxDecoration(
-                  color: ColorPalette().background,
-                  borderRadius: BorderRadius.circular(40),
-                  boxShadow: [
-                    BoxShadow(
-                      color: ColorPalette().background.withOpacity(0.3),
-                      offset: Offset(0, 20),
-                      blurRadius: 20,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(
-                    bottomNavItems.length,
-                        (index) => GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedNavIndex = index;
-                        });
-                      },
-                      child: Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          color: selectedNavIndex == index
-                              ? ColorPalette().secondaryColor
-                              : ColorPalette().inActiveNavIcon,
-                          shape: BoxShape.circle,
-                        ),
-                        height: selectedNavIndex == index ? 50 : 40,
-                        width: selectedNavIndex == index ? 50 : 40,
-                        child: Icon(
-                          bottomNavItems[index].icon,
-                          color: ColorPalette().white,
-                          size: selectedNavIndex == index ? 24 : 20,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 35),
+                child: Container(
+                  height: 66,
+                  margin: const EdgeInsets.symmetric(horizontal: 80),
+                  decoration: BoxDecoration(
+                    color: ColorPalette().background,
+                    borderRadius: BorderRadius.circular(40),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ColorPalette().background.withOpacity(0.3),
+                        offset: Offset(0, 20),
+                        blurRadius: 20,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(
+                      bottomNavItems.length,
+                          (index) => GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedNavIndex = index;
+                          });
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          decoration: BoxDecoration(
+                            color: selectedNavIndex == index
+                                ? ColorPalette().secondaryColor
+                                : ColorPalette().inActiveNavIcon,
+                            shape: BoxShape.circle,
+                          ),
+                          height: selectedNavIndex == index ? 50 : 40,
+                          width: selectedNavIndex == index ? 50 : 40,
+                          child: Icon(
+                            bottomNavItems[index].icon,
+                            color: ColorPalette().white,
+                            size: selectedNavIndex == index ? 24 : 20,
+                          ),
                         ),
                       ),
                     ),

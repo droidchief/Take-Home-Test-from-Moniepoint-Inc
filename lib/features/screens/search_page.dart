@@ -59,16 +59,12 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
       curve: Curves.easeOutCubic,
     );
 
-    _scaleAnimationController.forward();
-
-
     _overlayAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
     );
 
     _overlayAnimation = CurvedAnimation(parent: _overlayAnimationController, curve: Curves.easeOutCubic);
-
 
   }
 

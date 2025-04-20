@@ -3,7 +3,7 @@ import 'dart:ui';
 class ColorPalette {
   Color background = Color(0xFF26252A);
   Color inActiveNavIcon = Color(0xFF1C1B21);
-  Color secondaryColor = Color(0xFFF3A110);
+  Color secondaryColor = Color(0xFFF6AC2A);
   Color white = Color(0xFFFFFFFF);
   Color offWhite = Color(0xFDFCFCFF);
   Color black = Color(0xFF000000);
@@ -13,5 +13,5 @@ class ColorPalette {
   Color darkBeige = Color(0xFFE6DDCE);
   Color gray = Color(0xFFC6C3BF);
   Color darkGray = Color(0xFFA5A4A3);
-  Color mapBackground = Color(0xFF100F18);
+  Color mapBackground = Color(0xFF0F0E13);
 }

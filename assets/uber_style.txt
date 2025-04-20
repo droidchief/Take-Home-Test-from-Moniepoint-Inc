@@ -2,7 +2,7 @@
   {
     "elementType": "geometry",
     "stylers": [
-      { "color": "#100F18" }
+      { "color": "#0F0E13" }
     ]
   },
   {
@@ -14,7 +14,7 @@
   {
     "elementType": "labels.text.stroke",
     "stylers": [
-      { "color": "#100F18" }
+      { "color": "#0F0E13" }
     ]
   },
   {
