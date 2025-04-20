@@ -78,7 +78,7 @@ class _BottomNavState extends State<BottomNav> with SingleTickerProviderStateMix
                 padding: const EdgeInsets.only(bottom: 35),
                 child: Container(
                   height: 66,
-                  margin: const EdgeInsets.symmetric(horizontal: 75),
+                  margin: const EdgeInsets.symmetric(horizontal: 70),
                   decoration: BoxDecoration(
                     color: ColorPalette().background,
                     borderRadius: BorderRadius.circular(40),
@@ -100,23 +100,34 @@ class _BottomNavState extends State<BottomNav> with SingleTickerProviderStateMix
                             selectedNavIndex = index;
                           });
                         },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 5),
-                          decoration: BoxDecoration(
-                            color: selectedNavIndex == index
-                                ? ColorPalette().secondaryColor
-                                : ColorPalette().inActiveNavIcon,
-                            shape: BoxShape.circle,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeInOut,
+                              height: 50,
+                              width: 50,
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
+                              decoration: BoxDecoration(
+                                color: selectedNavIndex == index
+                                    ? ColorPalette().secondaryColor
+                                    : ColorPalette().inActiveNavIcon,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 500),
+                                  transitionBuilder: (child, animation) =>
+                                      FadeTransition(opacity: animation, child: child),
+                                  child: Icon(
+                                    bottomNavItems[index].icon,
+                                    key: ValueKey<bool>(selectedNavIndex == index),
+                                    color: ColorPalette().white,
+                                    size: selectedNavIndex == index ? 24 : 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+
                           ),
-                          height: selectedNavIndex == index ? 50 : 40,
-                          width: selectedNavIndex == index ? 50 : 40,
-                          child: Icon(
-                            bottomNavItems[index].icon,
-                            color: ColorPalette().white,
-                            size: selectedNavIndex == index ? 24 : 20,
-                          ),
-                        ),
-                      ),
                     ),
                   ),
                 ),

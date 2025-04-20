@@ -22,7 +22,7 @@ class ArrowButton extends StatelessWidget {
       ),
       child: Icon(
         Icons.keyboard_arrow_right_sharp,
-        size: 16,
+        size: 20,
         color: ColorPalette().darkGray,
       ),
     );
