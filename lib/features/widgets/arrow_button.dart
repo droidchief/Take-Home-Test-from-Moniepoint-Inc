@@ -7,8 +7,8 @@ class ArrowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 45,
-      width: 45,
+      height: 55,
+      width: 55,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: ColorPalette().white,

@@ -23,7 +23,7 @@ class _AddressLabelState extends State<AddressLabel> {
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
           padding: const EdgeInsets.only(right: 3, left: 10),
-          height: 65,
+          height: 60,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
