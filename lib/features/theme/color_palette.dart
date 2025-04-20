@@ -13,4 +13,5 @@ class ColorPalette {
   Color darkBeige = Color(0xFFE6DDCE);
   Color gray = Color(0xFFC6C3BF);
   Color darkGray = Color(0xFFA5A4A3);
+  Color mapBackground = Color(0xFF100F18);
 }

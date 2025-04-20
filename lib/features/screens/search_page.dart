@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -26,6 +25,7 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
   String? _mapStyle;
   GoogleMapController? mapController;
   bool _isMapReady = false;
+  bool _showMarkers = false;
   PropertyFilter selectedPropertyFilter = PropertyFilter.price;
 
   final List<CustomMarkerModel> markerPositions = [
@@ -38,7 +38,9 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
   ];
 
   OverlayEntry? _overlayEntry;
-  late AnimationController _controller;
+  late AnimationController _overlayAnimationController;
+  late Animation<double> _overlayAnimation;
+  late AnimationController _scaleAnimationController;
   late Animation<double> _scaleAnimation;
 
 
@@ -47,16 +49,33 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
     super.initState();
     _loadMapStyle();
 
-    _controller = AnimationController(
+    _scaleAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _scaleAnimation = CurvedAnimation(
+      parent: _scaleAnimationController,
+      curve: Curves.easeOutCubic,
+    );
+
+    _scaleAnimationController.forward();
+
+
+    _overlayAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
     );
-    _scaleAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
+
+    _overlayAnimation = CurvedAnimation(parent: _overlayAnimationController, curve: Curves.easeOutCubic);
+
+
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _scaleAnimationController.dispose();
+    _overlayAnimationController.dispose();
     super.dispose();
   }
 
@@ -118,7 +137,7 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
               color: Colors.transparent,
               child: ScaleTransition(
                 alignment: Alignment.bottomLeft,
-                scale: _scaleAnimation,
+                scale: _overlayAnimation,
                 child: GestureDetector(
                   onTap: () {}, // Prevents tap from bubbling up to dismiss
                   child: Container(
@@ -173,12 +192,12 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
 
     Overlay.of(context).insert(_overlayEntry!);
     Future.delayed(Duration(milliseconds: 300), () {
-      _controller.forward();
+      _overlayAnimationController.forward();
     });
   }
 
   void _removeOverlay() async {
-    await _controller.reverse();
+    await _overlayAnimationController.reverse();
     _overlayEntry?.remove();
     _overlayEntry = null;
   }
@@ -186,7 +205,7 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorPalette().black,
+      backgroundColor: ColorPalette().mapBackground,
       floatingActionButtonLocation: ExpandableFab.location,
       body: SafeArea(
         child: Stack(
@@ -202,10 +221,33 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
                 myLocationButtonEnabled: true,
                 myLocationEnabled: true,
                 compassEnabled: false,
-                onMapCreated: (GoogleMapController controller) {
+                onMapCreated: (GoogleMapController controller) async {
                   controller.setMapStyle(_mapStyle);
                   mapController ??= controller;
+
+                  // Ensure rendering is delayed slightly to avoid flicker
+                  await Future.delayed(const Duration(milliseconds: 300));
+
+                  if (mounted) {
+                    setState(() {
+                      _isMapReady = true;
+                    });
+                  }
+
+                  // Start scale animation 500ms after map is shown
+                  await Future.delayed(const Duration(milliseconds: 500));
+                  _scaleAnimationController.forward();
+
+                  // After scale animation is complete, show custom markers
+                  _scaleAnimationController.addStatusListener((status) {
+                    if (status == AnimationStatus.completed) {
+                      setState(() {
+                        _showMarkers = true;
+                      });
+                    }
+                  });
                 },
+
               )
             else
               Container(
@@ -226,40 +268,46 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
                   Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: ColorPalette().white,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Iconsax.search_normal_copy,
-                                  size: 20,
-                                  color: ColorPalette().black.withOpacity(0.7)),
-                              const Gap(5),
-                              Text(
-                                "Saint Petersburg",
-                                style: GoogleFonts.manrope(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: ColorPalette().black.withOpacity(0.7),
+                        child: ScaleTransition(
+                          scale: _scaleAnimation,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: ColorPalette().white,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Iconsax.search_normal_copy,
+                                    size: 20,
+                                    color: ColorPalette().black.withOpacity(0.7)),
+                                const Gap(5),
+                                Text(
+                                  "Saint Petersburg",
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: ColorPalette().black.withOpacity(0.7),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
                       const Gap(10),
-                      Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: ColorPalette().white,
-                          borderRadius: BorderRadius.circular(30),
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: ColorPalette().white,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: const Icon(Iconsax.arrow_2, size: 16,),
                         ),
-                        child: const Icon(Iconsax.arrow_2, size: 16,),
                       ),
                     ],
                   ),
@@ -272,20 +320,23 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
               left: 35,
               child: Builder(
                 builder: (context) {
-                  return RippleButton(
-                    key: _markerKey,
-                    icon: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(30),
+                  return ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: RippleButton(
+                      key: _markerKey,
+                      icon: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Icon(getPropertyFilterIcon(selectedPropertyFilter), size: 20, color: ColorPalette().white,),
                       ),
-                      child: Icon(getPropertyFilterIcon(selectedPropertyFilter), size: 20, color: ColorPalette().white,),
+                      onTap: () {
+                        _showOverlayOnTop(context);
+                      },
                     ),
-                    onTap: () {
-                      _showOverlayOnTop(context);
-                    },
                   );
                 }
               ),
@@ -294,64 +345,71 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
             Positioned(
               bottom: 85,
               left: 35,
-              child: RippleButton(
-                icon: Container(
-                  height: 50,
-                  width: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(30),
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: RippleButton(
+                  icon: Container(
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Transform.rotate(
+                      angle: 0.8,
+                      child: Icon(Iconsax.direct_up_copy, size: 20, color: ColorPalette().white,),
+                    ),
                   ),
-                  child: Transform.rotate(
-                    angle: 0.8,
-                    child: Icon(Iconsax.direct_up_copy, size: 20, color: ColorPalette().white,),
-                  ),
-                ),
-                onTap: () {
+                  onTap: () {
 
-                },
+                  },
+                ),
               ),
             ),
 
             Positioned(
               bottom: 85,
               right: 35,
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: ColorPalette().darkGray.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Row(
-                    children: [
-                      Icon(Iconsax.textalign_left, size: 20, color: ColorPalette().white,),
-                      const Gap(8),
-                      Text(
-                        "List of variants",
-                        style: GoogleFonts.manrope(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: ColorPalette().white,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: ColorPalette().darkGray.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(
+                      children: [
+                        Icon(Iconsax.textalign_left, size: 20, color: ColorPalette().white,),
+                        const Gap(8),
+                        Text(
+                          "List of variants",
+                          style: GoogleFonts.manrope(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: ColorPalette().white,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               )
               ,
             ),
 
-            Stack(
-              children: markerPositions.map((data) {
-                return Positioned(
-                  left: data.position.dx,
-                  top: data.position.dy,
-                  child: CustomMarker(model: data),
-                );
-              }).toList(),
-            )
+            if(_showMarkers)
+              Stack(
+                children: markerPositions.map((data) {
+                  return Positioned(
+                    left: data.position.dx,
+                    top: data.position.dy,
+                    child: CustomMarker(model: data, propertyFilter: selectedPropertyFilter),
+                  );
+                }).toList(),
+              )
 
           ],
         ),
