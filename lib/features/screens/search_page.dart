@@ -13,6 +13,8 @@ import '../models/custom_marker_model.dart';
 import '../models/enums.dart';
 import '../widgets/ripple_button.dart';
 
+GlobalKey _markerKey = GlobalKey();
+
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
@@ -20,7 +22,7 @@ class SearchPage extends StatefulWidget {
   State<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
   String? _mapStyle;
   GoogleMapController? mapController;
   bool _isMapReady = false;
@@ -35,10 +37,27 @@ class _SearchPageState extends State<SearchPage> {
     CustomMarkerModel(position: Offset(250, 490), price: 6.95, icon: Iconsax.house),
   ];
 
+  OverlayEntry? _overlayEntry;
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+
   @override
   void initState() {
     super.initState();
     _loadMapStyle();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _scaleAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   Future<void> _loadMapStyle() async {
@@ -56,10 +75,112 @@ class _SearchPageState extends State<SearchPage> {
       case PropertyFilter.cosyArea:
         return Iconsax.shield_tick_copy;
       case PropertyFilter.infrastructure:
-        return Iconsax.gift_copy;
+        return Iconsax.bag_copy;
       case PropertyFilter.withoutAnyLayer:
         return Iconsax.layer_copy;
     }
+  }
+
+  String getPropertyFilterLabel(PropertyFilter filter) {
+    switch (filter) {
+      case PropertyFilter.cosyArea:
+        return 'Cosy areas';
+      case PropertyFilter.price:
+        return 'Price';
+      case PropertyFilter.infrastructure:
+        return 'Infrastructure';
+      case PropertyFilter.withoutAnyLayer:
+        return 'Without any layer';
+    }
+  }
+
+  void _showOverlayOnTop(BuildContext context) {
+    if (_overlayEntry != null) return;
+
+    final renderBox = context.findRenderObject() as RenderBox;
+    final offset = renderBox.localToGlobal(Offset.zero);
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          GestureDetector(
+            onTap: _removeOverlay,
+            behavior: HitTestBehavior.translucent,
+            child: Container(
+              color: Colors.transparent,
+            ),
+          ),
+
+          Positioned(
+            left: offset.dx,
+            top: offset.dy - 143,
+            child: Material(
+              color: Colors.transparent,
+              child: ScaleTransition(
+                alignment: Alignment.bottomLeft,
+                scale: _scaleAnimation,
+                child: GestureDetector(
+                  onTap: () {}, // Prevents tap from bubbling up to dismiss
+                  child: Container(
+                    width: 185,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: PropertyFilter.values.map((filter) {
+                        final isSelected = selectedPropertyFilter == filter;
+
+                        return ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                          horizontalTitleGap: 5,
+                          leading: Icon(getPropertyFilterIcon(filter), color: isSelected ? ColorPalette().secondaryColor.withOpacity(0.8) : ColorPalette().darkGray, size: 20,),
+                          title: Text(
+                              getPropertyFilterLabel(filter),
+                              style: GoogleFonts.manrope(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: isSelected ? ColorPalette().secondaryColor.withOpacity(0.8) : ColorPalette().darkGray,
+                              )
+                          ),
+                          onTap: () {
+                            setState(() {
+                              selectedPropertyFilter = filter;
+                            });
+                            _removeOverlay();
+                            debugPrint('Selected: $selectedPropertyFilter');
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
+    Future.delayed(Duration(milliseconds: 300), () {
+      _controller.forward();
+    });
+  }
+
+  void _removeOverlay() async {
+    await _controller.reverse();
+    _overlayEntry?.remove();
+    _overlayEntry = null;
   }
 
   @override
@@ -149,19 +270,24 @@ class _SearchPageState extends State<SearchPage> {
             Positioned(
               bottom: 143,
               left: 35,
-              child: RippleButton(
-                icon: Container(
-                  height: 50,
-                  width: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Icon(getPropertyFilterIcon(selectedPropertyFilter), size: 20, color: ColorPalette().white,),
-                ),
-                onTap: () {
-
-                },
+              child: Builder(
+                builder: (context) {
+                  return RippleButton(
+                    key: _markerKey,
+                    icon: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Icon(getPropertyFilterIcon(selectedPropertyFilter), size: 20, color: ColorPalette().white,),
+                    ),
+                    onTap: () {
+                      _showOverlayOnTop(context);
+                    },
+                  );
+                }
               ),
             ),
 
