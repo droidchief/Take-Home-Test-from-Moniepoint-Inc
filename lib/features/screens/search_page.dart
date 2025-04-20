@@ -25,12 +25,12 @@ class _SearchPageState extends State<SearchPage> {
   bool _isMapReady = false;
 
   final List<CustomMarkerModel> markerPositions = [
-    CustomMarkerModel(position: Offset(120, 160), price: 10.3, icon: Iconsax.house),
-    CustomMarkerModel(position: Offset(140, 215), price: 11, icon: Iconsax.house),
-    CustomMarkerModel(position: Offset(300, 240), price: 7.8, icon: Iconsax.house),
-    CustomMarkerModel(position: Offset(300, 350), price: 8.5, icon: Iconsax.house),
-    CustomMarkerModel(position: Offset(80, 400), price: 13.3, icon: Iconsax.house),
-    CustomMarkerModel(position: Offset(250, 450), price: 6.95, icon: Iconsax.house),
+    CustomMarkerModel(position: Offset(120, 200), price: 10.3, icon: Iconsax.house),
+    CustomMarkerModel(position: Offset(140, 255), price: 11, icon: Iconsax.house),
+    CustomMarkerModel(position: Offset(300, 280), price: 7.8, icon: Iconsax.house),
+    CustomMarkerModel(position: Offset(300, 390), price: 8.5, icon: Iconsax.house),
+    CustomMarkerModel(position: Offset(90, 440), price: 13.3, icon: Iconsax.house),
+    CustomMarkerModel(position: Offset(250, 490), price: 6.95, icon: Iconsax.house),
   ];
 
 

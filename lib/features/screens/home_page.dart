@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
                                 "Saint Petersburg",
                                 style: GoogleFonts.manrope(
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w800,
                                   color: ColorPalette().lightBrown,
                                 ),
                               )
@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       "let's select your \nperfect place",
                       style: GoogleFonts.manrope(
-                          fontSize: 32,
+                          fontSize: 36,
                           fontWeight: FontWeight.w500,
                           color: ColorPalette().black,
                           height: 0
@@ -114,8 +114,8 @@ class _HomePageState extends State<HomePage> {
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.manrope(
                                         fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                        color: ColorPalette().white,
+                                        fontWeight: FontWeight.w800,
+                                        color: ColorPalette().warmPeach,
                                       ),
                                     ),
                                   ),
@@ -135,9 +135,9 @@ class _HomePageState extends State<HomePage> {
                                           TextSpan(
                                             text: "offers",
                                             style: GoogleFonts.poppins(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
-                                                color: ColorPalette().white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w700,
+                                                color: ColorPalette().warmPeach,
                                                 height: 0
                                             ),
                                           ),
@@ -171,7 +171,7 @@ class _HomePageState extends State<HomePage> {
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.manrope(
                                         fontSize: 14,
-                                        fontWeight: FontWeight.w700,
+                                        fontWeight: FontWeight.w800,
                                         color: ColorPalette().lightBrown,
                                       ),
                                     ),
@@ -192,8 +192,8 @@ class _HomePageState extends State<HomePage> {
                                           TextSpan(
                                             text: "offers",
                                             style: GoogleFonts.poppins(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w700,
                                                 color: ColorPalette().lightBrown,
                                                 height: 0
                                             ),

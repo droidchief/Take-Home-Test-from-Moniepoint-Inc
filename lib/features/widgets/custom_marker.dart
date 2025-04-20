@@ -16,7 +16,7 @@ class _CustomMarkerState extends State<CustomMarker> {
   Widget build(BuildContext context) {
     return Container(
       height: 45,
-      width: 70,
+      width: 80,
       decoration: BoxDecoration(
         color: ColorPalette().secondaryColor,
         borderRadius: BorderRadius.only(
