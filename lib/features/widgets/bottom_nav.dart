@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:monie_point_flutter_test/features/screens/favourite_page.dart';
 import 'package:monie_point_flutter_test/features/screens/home_page.dart';
+import 'package:monie_point_flutter_test/features/screens/profile_page.dart';
 import 'package:monie_point_flutter_test/features/screens/search_page.dart';
 import 'package:monie_point_flutter_test/features/theme/color_palette.dart';
 
 import '../models/bottom_nav_model.dart';
+import '../screens/chats_page.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});
@@ -18,10 +21,10 @@ class _BottomNavState extends State<BottomNav> with SingleTickerProviderStateMix
 
   List<Widget> pages = [
     SearchPage(),
-    Text("Chats"),
+    ChatsPage(),
     HomePage(),
-    Text("Favourites"),
-    Text("Account"),
+    FavouritePage(),
+    ProfilePage(),
   ];
 
   int selectedNavIndex = 2;

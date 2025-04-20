@@ -224,7 +224,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                   shape: BoxShape.circle,
                                   color: ColorPalette().lightBrown,
 
-                                  image: DecorationImage(image: AssetImage("assets/images/profile.png"))
+                                  image: DecorationImage(image: AssetImage("assets/images/profile.jpg"))
                               ),
                             ),
                           ),
@@ -430,7 +430,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   controller: scrollController,
                   children: const [
                     PropertyCard(
-                      imageAsset: "assets/images/random_image_1.png",
+                      imageAsset: "assets/images/random_image_1.jpg",
                       address: "Gladkova St., 25",
                       height: 250,
                       isAddressCenter: true,
@@ -442,7 +442,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         Expanded(
                           flex: 1,
                           child: PropertyCard(
-                            imageAsset: "assets/images/random_image_2.png",
+                            imageAsset: "assets/images/random_image_2.jpg",
                             address: "Gubina St., 11",
                             height: 360,
                           ),
@@ -453,13 +453,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           child: Column(
                             children: [
                               PropertyCard(
-                                imageAsset: "assets/images/random_image_3.png",
+                                imageAsset: "assets/images/random_image_3.jpg",
                                 address: "Trefoleva St., 43",
                                 height: 175,
                               ),
                               Gap(10),
                               PropertyCard(
-                                imageAsset: "assets/images/random_image_4.png",
+                                imageAsset: "assets/images/random_image_4.jpg",
                                 address: "Sedova St., 22",
                                 height: 175,
                               ),
