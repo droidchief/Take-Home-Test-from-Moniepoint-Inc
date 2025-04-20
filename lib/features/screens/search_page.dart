@@ -10,6 +10,7 @@ import 'package:monie_point_flutter_test/features/theme/color_palette.dart';
 import 'package:monie_point_flutter_test/features/widgets/custom_marker.dart';
 
 import '../models/custom_marker_model.dart';
+import '../models/enums.dart';
 import '../widgets/ripple_button.dart';
 
 class SearchPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _SearchPageState extends State<SearchPage> {
   String? _mapStyle;
   GoogleMapController? mapController;
   bool _isMapReady = false;
+  PropertyFilter selectedPropertyFilter = PropertyFilter.price;
 
   final List<CustomMarkerModel> markerPositions = [
     CustomMarkerModel(position: Offset(120, 200), price: 10.3, icon: Iconsax.house),
@@ -32,7 +34,6 @@ class _SearchPageState extends State<SearchPage> {
     CustomMarkerModel(position: Offset(90, 440), price: 13.3, icon: Iconsax.house),
     CustomMarkerModel(position: Offset(250, 490), price: 6.95, icon: Iconsax.house),
   ];
-
 
   @override
   void initState() {
@@ -46,6 +47,19 @@ class _SearchPageState extends State<SearchPage> {
       _mapStyle = style;
       _isMapReady = true;
     });
+  }
+
+  IconData getPropertyFilterIcon(PropertyFilter value) {
+    switch(value) {
+      case PropertyFilter.price:
+        return Iconsax.empty_wallet_copy;
+      case PropertyFilter.cosyArea:
+        return Iconsax.shield_tick_copy;
+      case PropertyFilter.infrastructure:
+        return Iconsax.gift_copy;
+      case PropertyFilter.withoutAnyLayer:
+        return Iconsax.layer_copy;
+    }
   }
 
   @override
@@ -143,7 +157,7 @@ class _SearchPageState extends State<SearchPage> {
                     color: Colors.grey.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  child: Icon(Iconsax.empty_wallet_copy, size: 20, color: ColorPalette().white,),
+                  child: Icon(getPropertyFilterIcon(selectedPropertyFilter), size: 20, color: ColorPalette().white,),
                 ),
                 onTap: () {
 
@@ -212,7 +226,6 @@ class _SearchPageState extends State<SearchPage> {
                 );
               }).toList(),
             )
-
 
           ],
         ),
