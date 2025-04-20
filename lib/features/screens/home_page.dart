@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin, Widg
   late Animation<Offset> _welcomeTextSlideAnimation;
   late Animation<double> _welcomeTextRevealAnimation;
 
+  final DraggableScrollableController _sheetController = DraggableScrollableController();
 
   @override
   void initState() {
@@ -112,7 +113,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin, Widg
       // Start the width animation
       _locationBarExpandController.forward().then((_) {
         _locationIconController.forward().then((_) {
-          _welcomeTextController.forward();
+          _welcomeTextController.forward().then((_) {
+            _sheetController.animateTo(
+              0.68,
+              duration: const Duration(milliseconds: 1000),
+              curve: Curves.easeInOut,
+            );
+          });
           _dashboardEntryController.forward();
         });
       });
@@ -405,9 +412,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin, Widg
             ),
           ),
           DraggableScrollableSheet(
-            initialChildSize: 0.40,
-            minChildSize: 0.40,
-            maxChildSize: 0.85,
+            controller: _sheetController,
+            initialChildSize: 0,
+            minChildSize: 0,
+            maxChildSize: 0.68,
             builder: (context, scrollController) {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -425,7 +433,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin, Widg
                     PropertyCard(
                       imageAsset: "assets/images/random_image_1.png",
                       address: "Gladkova St., 25",
-                      height: 200,
+                      height: 250,
                       isAddressCenter: true,
                     ),
                     const Gap(10),
@@ -437,7 +445,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin, Widg
                           child: PropertyCard(
                             imageAsset: "assets/images/random_image_2.png",
                             address: "Gubina St., 11",
-                            height: 350,
+                            height: 360,
                           ),
                         ),
                         const Gap(10),
@@ -448,13 +456,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin, Widg
                               PropertyCard(
                                 imageAsset: "assets/images/random_image_3.png",
                                 address: "Trefoleva St., 43",
-                                height: 170,
+                                height: 175,
                               ),
                               const Gap(10),
                               PropertyCard(
                                 imageAsset: "assets/images/random_image_4.png",
                                 address: "Sedova St., 22",
-                                height: 170,
+                                height: 175,
                               ),
                             ],
                           ),

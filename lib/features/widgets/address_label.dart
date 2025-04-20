@@ -4,12 +4,17 @@ import 'dart:ui';
 
 import '../theme/color_palette.dart';
 import 'arrow_button.dart';
-class AddressLabel extends StatelessWidget {
+class AddressLabel extends StatefulWidget {
   final String address;
   final bool isCenter;
 
   const AddressLabel({super.key, required this.address, this.isCenter = false});
 
+  @override
+  State<AddressLabel> createState() => _AddressLabelState();
+}
+
+class _AddressLabelState extends State<AddressLabel> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -18,7 +23,7 @@ class AddressLabel extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
           padding: const EdgeInsets.only(right: 3, left: 10),
-          height: 55,
+          height: 65,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -44,11 +49,11 @@ class AddressLabel extends StatelessWidget {
           child: Stack(
             children: [
               Align(
-                alignment: isCenter ? Alignment.center : Alignment.centerLeft ,
+                alignment: widget.isCenter ? Alignment.center : Alignment.centerLeft ,
                 child: Text(
-                  address,
+                  widget.address,
                   style: GoogleFonts.manrope(
-                    fontSize: isCenter ? 16 : 14,
+                    fontSize: widget.isCenter ? 16 : 14,
                     fontWeight: FontWeight.w600,
                     color: ColorPalette().black.withOpacity(0.8),
                   ),

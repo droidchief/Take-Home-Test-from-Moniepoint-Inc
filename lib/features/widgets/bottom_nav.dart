@@ -35,8 +35,8 @@ class _BottomNavState extends State<BottomNav> with SingleTickerProviderStateMix
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1), // start off-screen (bottom)
-      end: Offset.zero, // end at normal position
+      begin: const Offset(0, 1),
+      end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeOut,
@@ -75,7 +75,7 @@ class _BottomNavState extends State<BottomNav> with SingleTickerProviderStateMix
                 padding: const EdgeInsets.only(bottom: 35),
                 child: Container(
                   height: 66,
-                  margin: const EdgeInsets.symmetric(horizontal: 80),
+                  margin: const EdgeInsets.symmetric(horizontal: 75),
                   decoration: BoxDecoration(
                     color: ColorPalette().background,
                     borderRadius: BorderRadius.circular(40),
