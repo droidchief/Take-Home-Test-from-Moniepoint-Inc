@@ -18,7 +18,7 @@ class AddressLabel extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
           padding: const EdgeInsets.only(right: 3, left: 10),
-          height: 50,
+          height: 55,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [

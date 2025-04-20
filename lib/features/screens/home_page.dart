@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:monie_point_flutter_test/features/theme/color_palette.dart';
 
+import '../utils/utils.dart';
 import '../widgets/property_card.dart';
 
 class HomePage extends StatefulWidget {
@@ -283,31 +284,42 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin, Widg
                                       ),
                                     ),
                                     Center(
-                                      child: RichText(
-                                        textAlign: TextAlign.center,
-                                        text: TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text: "1034\n",
-                                              style: GoogleFonts.manrope(
-                                                fontSize: 40,
-                                                fontWeight: FontWeight.w700,
-                                                color: ColorPalette().white,
-                                              ),
-                                            ),
-                                            TextSpan(
-                                              text: "offers",
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: ColorPalette().warmPeach,
-                                                  height: 0
-                                              ),
-                                            ),
-                                          ],
+                                      child: StreamBuilder<String>(
+                                        stream: countToNumber(
+                                          targetNumber: 1034,
+                                          totalDuration: Duration(milliseconds: 2000),
                                         ),
+                                        initialData: "0",
+                                        builder: (context, snapshot) {
+                                          final count = snapshot.data ?? "0";
+                                          return RichText(
+                                            textAlign: TextAlign.center,
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: "$count\n",
+                                                  style: GoogleFonts.manrope(
+                                                    fontSize: 40,
+                                                    fontWeight: FontWeight.w900,
+                                                    color: ColorPalette().white,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: "offers",
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: ColorPalette().warmPeach,
+                                                    height: 0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
                                       ),
-                                    )
+                                    ),
+
                                   ],
                                 ),
                               ),
@@ -343,31 +355,42 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin, Widg
                                       ),
                                     ),
                                     Center(
-                                      child: RichText(
-                                        textAlign: TextAlign.center,
-                                        text: TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text: "2 212\n",
-                                              style: GoogleFonts.manrope(
-                                                fontSize: 40,
-                                                fontWeight: FontWeight.w700,
-                                                color: ColorPalette().lightBrown,
-                                              ),
-                                            ),
-                                            TextSpan(
-                                              text: "offers",
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: ColorPalette().lightBrown,
-                                                  height: 0
-                                              ),
-                                            ),
-                                          ],
+                                      child: StreamBuilder<String>(
+                                        stream: countToNumber(
+                                          targetNumber: 2212,
+                                          totalDuration: Duration(milliseconds: 2000),
                                         ),
+                                        initialData: "0",
+                                        builder: (context, snapshot) {
+                                          final count = snapshot.data ?? "0";
+                                          return RichText(
+                                            textAlign: TextAlign.center,
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: "$count\n",
+                                                  style: GoogleFonts.manrope(
+                                                    fontSize: 40,
+                                                    fontWeight: FontWeight.w900,
+                                                    color: ColorPalette().brown,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: "offers",
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: ColorPalette().lightBrown,
+                                                    height: 0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
                                       ),
-                                    )
+                                    ),
+
                                   ],
                                 ),
                               ),
@@ -382,8 +405,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin, Widg
             ),
           ),
           DraggableScrollableSheet(
-            initialChildSize: 0.38,
-            minChildSize: 0.38,
+            initialChildSize: 0.40,
+            minChildSize: 0.40,
             maxChildSize: 0.85,
             builder: (context, scrollController) {
               return Container(

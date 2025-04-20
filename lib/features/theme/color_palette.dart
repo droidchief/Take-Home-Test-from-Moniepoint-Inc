@@ -8,6 +8,7 @@ class ColorPalette {
   Color offWhite = Color(0xFDFCFCFF);
   Color black = Color(0xFF000000);
   Color lightBrown = Color(0xFFC3B69C);
+  Color brown = Color(0xFFB1A07E);
   Color warmPeach = Color(0xFFFDE1B9);
   Color beige = Color(0xFAF7F7FF);
   Color darkBeige = Color(0xFFE6DDCE);
