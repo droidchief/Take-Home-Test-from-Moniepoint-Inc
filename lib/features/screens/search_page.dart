@@ -8,11 +8,9 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:monie_point_flutter_test/features/theme/color_palette.dart';
 import 'package:monie_point_flutter_test/features/widgets/custom_marker.dart';
 
-import '../models/custom_marker_model.dart';
+import '../models/constants.dart';
 import '../models/enums.dart';
 import '../widgets/ripple_button.dart';
-
-GlobalKey _markerKey = GlobalKey();
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -22,20 +20,13 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
+  final _markerKey = GlobalKey();
+
+  GoogleMapController? _mapController;
   String? _mapStyle;
-  GoogleMapController? mapController;
   bool _isMapReady = false;
   bool _showMarkers = false;
   PropertyFilter selectedPropertyFilter = PropertyFilter.price;
-
-  final List<CustomMarkerModel> markerPositions = [
-    CustomMarkerModel(position: Offset(120, 200), price: 10.3, icon: Iconsax.house),
-    CustomMarkerModel(position: Offset(140, 255), price: 11, icon: Iconsax.house),
-    CustomMarkerModel(position: Offset(300, 280), price: 7.8, icon: Iconsax.house),
-    CustomMarkerModel(position: Offset(300, 390), price: 8.5, icon: Iconsax.house),
-    CustomMarkerModel(position: Offset(90, 440), price: 13.3, icon: Iconsax.house),
-    CustomMarkerModel(position: Offset(250, 490), price: 6.95, icon: Iconsax.house),
-  ];
 
   OverlayEntry? _overlayEntry;
   late AnimationController _overlayAnimationController;
@@ -43,12 +34,17 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
   late AnimationController _scaleAnimationController;
   late Animation<double> _scaleAnimation;
 
+  // Preload map style
+  final Future<String> _mapStyleFuture = rootBundle.loadString('assets/uber_style.txt');
 
   @override
   void initState() {
     super.initState();
-    _loadMapStyle();
+    _initializeAnimations();
+    _prepareMapStyle();
+  }
 
+  void _initializeAnimations() {
     _scaleAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -64,23 +60,43 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 700),
     );
 
-    _overlayAnimation = CurvedAnimation(parent: _overlayAnimationController, curve: Curves.easeOutCubic);
+    _overlayAnimation = CurvedAnimation(
+        parent: _overlayAnimationController,
+        curve: Curves.easeOutCubic
+    );
 
+    _scaleAnimationController.addStatusListener(_handleScaleAnimationStatus);
+  }
+
+  void _handleScaleAnimationStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed && mounted) {
+      setState(() {
+        _showMarkers = true;
+      });
+    }
+  }
+
+  Future<void> _prepareMapStyle() async {
+    try {
+      _mapStyle = await _mapStyleFuture;
+      if (mounted) {
+        setState(() {
+          _isMapReady = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading map style: $e');
+    }
   }
 
   @override
   void dispose() {
+    _removeOverlay();
+    _scaleAnimationController.removeStatusListener(_handleScaleAnimationStatus);
     _scaleAnimationController.dispose();
     _overlayAnimationController.dispose();
+    _mapController?.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadMapStyle() async {
-    final style = await rootBundle.loadString('assets/uber_style.txt');
-    setState(() {
-      _mapStyle = style;
-      _isMapReady = true;
-    });
   }
 
   IconData getPropertyFilterIcon(PropertyFilter value) {
@@ -116,300 +132,327 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
     final offset = renderBox.localToGlobal(Offset.zero);
 
     _overlayEntry = OverlayEntry(
-      builder: (context) => Stack(
-        children: [
-          GestureDetector(
-            onTap: _removeOverlay,
-            behavior: HitTestBehavior.translucent,
-            child: Container(
-              color: Colors.transparent,
-            ),
-          ),
-
-          Positioned(
-            left: offset.dx,
-            top: offset.dy - 143,
-            child: Material(
-              color: Colors.transparent,
-              child: ScaleTransition(
-                alignment: Alignment.bottomLeft,
-                scale: _overlayAnimation,
-                child: GestureDetector(
-                  onTap: () {}, // Prevents tap from bubbling up to dismiss
-                  child: Container(
-                    width: 185,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: PropertyFilter.values.map((filter) {
-                        final isSelected = selectedPropertyFilter == filter;
-
-                        return ListTile(
-                          dense: true,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                          horizontalTitleGap: 5,
-                          leading: Icon(getPropertyFilterIcon(filter), color: isSelected ? ColorPalette().secondaryColor.withOpacity(0.8) : ColorPalette().darkGray, size: 20,),
-                          title: Text(
-                              getPropertyFilterLabel(filter),
-                              style: GoogleFonts.manrope(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: isSelected ? ColorPalette().secondaryColor.withOpacity(0.8) : ColorPalette().darkGray,
-                              )
-                          ),
-                          onTap: () {
-                            setState(() {
-                              selectedPropertyFilter = filter;
-                            });
-                            _removeOverlay();
-                            debugPrint('Selected: $selectedPropertyFilter');
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      builder: (context) => _buildOverlay(offset),
     );
 
     Overlay.of(context).insert(_overlayEntry!);
-    Future.delayed(Duration(milliseconds: 300), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _overlayAnimationController.forward();
     });
   }
 
+  Widget _buildOverlay(Offset offset) {
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: _removeOverlay,
+          behavior: HitTestBehavior.translucent,
+          child: Container(
+            color: Colors.transparent,
+          ),
+        ),
+        Positioned(
+          left: offset.dx,
+          top: offset.dy - 143,
+          child: Material(
+            color: Colors.transparent,
+            child: ScaleTransition(
+              alignment: Alignment.bottomLeft,
+              scale: _overlayAnimation,
+              child: _buildFilterMenu(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterMenu() {
+    final colorPalette = ColorPalette();
+    return Container(
+      width: 185,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: PropertyFilter.values.map((filter) {
+          final isSelected = selectedPropertyFilter == filter;
+          return _buildFilterOption(filter, isSelected, colorPalette);
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildFilterOption(PropertyFilter filter, bool isSelected, ColorPalette colorPalette) {
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      horizontalTitleGap: 5,
+      leading: Icon(
+        getPropertyFilterIcon(filter),
+        color: isSelected ? colorPalette.secondaryColor.withOpacity(0.8) : colorPalette.darkGray,
+        size: 20,
+      ),
+      title: Text(
+          getPropertyFilterLabel(filter),
+          style: GoogleFonts.manrope(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: isSelected ? colorPalette.secondaryColor.withOpacity(0.8) : colorPalette.darkGray,
+          )
+      ),
+      onTap: () => _selectFilter(filter),
+    );
+  }
+
+  void _selectFilter(PropertyFilter filter) {
+    setState(() {
+      selectedPropertyFilter = filter;
+    });
+    _removeOverlay();
+  }
+
   void _removeOverlay() async {
+    if (_overlayEntry == null) return;
+
     await _overlayAnimationController.reverse();
     _overlayEntry?.remove();
     _overlayEntry = null;
   }
 
+  void _onMapCreated(GoogleMapController controller) async {
+    _mapController = controller;
+    _mapController?.setMapStyle(_mapStyle);
+
+    // Small delay to prevent flicker
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (mounted) {
+      _scaleAnimationController.forward();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorPalette = ColorPalette();
+
     return Scaffold(
-      backgroundColor: ColorPalette().mapBackground,
+      backgroundColor: colorPalette.mapBackground,
       floatingActionButtonLocation: ExpandableFab.location,
       body: SafeArea(
-        child: Stack(
-          children: [
-            if (_isMapReady)
-              GoogleMap(
-                initialCameraPosition: const CameraPosition(
-                  target: LatLng(9.1099, 7.4042),
-                  zoom: 11,
-                ),
-                mapType: MapType.normal,
-                zoomControlsEnabled: false,
-                myLocationButtonEnabled: true,
-                myLocationEnabled: true,
-                compassEnabled: false,
-                onMapCreated: (GoogleMapController controller) async {
-                  controller.setMapStyle(_mapStyle);
-                  mapController ??= controller;
-
-                  // Ensure rendering is delayed slightly to avoid flicker
-                  await Future.delayed(const Duration(milliseconds: 300));
-
-                  if (mounted) {
-                    setState(() {
-                      _isMapReady = true;
-                    });
-                  }
-
-                  // Start scale animation 500ms after map is shown
-                  await Future.delayed(const Duration(milliseconds: 500));
-                  _scaleAnimationController.forward();
-
-                  // After scale animation is complete, show custom markers
-                  _scaleAnimationController.addStatusListener((status) {
-                    if (status == AnimationStatus.completed) {
-                      setState(() {
-                        _showMarkers = true;
-                      });
-                    }
-                  });
-                },
-
-              )
-            else
-              Container(
-                color: ColorPalette().black,
+        child: FutureBuilder<String>(
+            future: _mapStyleFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                return _buildMapLayout(colorPalette);
+              }
+              return Container(
+                color: colorPalette.black,
                 child: const Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                  ),
+                  child: CircularProgressIndicator(color: Colors.white),
                 ),
-              ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 35),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Gap(10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ScaleTransition(
-                          scale: _scaleAnimation,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: ColorPalette().white,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Iconsax.search_normal_copy,
-                                    size: 20,
-                                    color: ColorPalette().black.withOpacity(0.7)),
-                                const Gap(5),
-                                Text(
-                                  "Saint Petersburg",
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: ColorPalette().black.withOpacity(0.7),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Gap(10),
-                      ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: Container(
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: ColorPalette().white,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: const Icon(Iconsax.arrow_2, size: 16,),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            Positioned(
-              bottom: 143,
-              left: 35,
-              child: Builder(
-                builder: (context) {
-                  return ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: RippleButton(
-                      key: _markerKey,
-                      icon: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Icon(getPropertyFilterIcon(selectedPropertyFilter), size: 20, color: ColorPalette().white,),
-                      ),
-                      onTap: () {
-                        _showOverlayOnTop(context);
-                      },
-                    ),
-                  );
-                }
-              ),
-            ),
-
-            Positioned(
-              bottom: 85,
-              left: 35,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: RippleButton(
-                  icon: Container(
-                    height: 50,
-                    width: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Transform.rotate(
-                      angle: 0.8,
-                      child: Icon(Iconsax.direct_up_copy, size: 20, color: ColorPalette().white,),
-                    ),
-                  ),
-                  onTap: () {
-
-                  },
-                ),
-              ),
-            ),
-
-            Positioned(
-              bottom: 85,
-              right: 35,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: ColorPalette().darkGray.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Row(
-                      children: [
-                        Icon(Iconsax.textalign_left, size: 20, color: ColorPalette().white,),
-                        const Gap(8),
-                        Text(
-                          "List of variants",
-                          style: GoogleFonts.manrope(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: ColorPalette().white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-              ,
-            ),
-
-            if(_showMarkers)
-              Stack(
-                children: markerPositions.map((data) {
-                  return Positioned(
-                    left: data.position.dx,
-                    top: data.position.dy,
-                    child: CustomMarker(model: data, propertyFilter: selectedPropertyFilter),
-                  );
-                }).toList(),
-              )
-
-          ],
+              );
+            }
         ),
       ),
+    );
+  }
+
+  Widget _buildMapLayout(ColorPalette colorPalette) {
+    return Stack(
+      children: [
+        GoogleMap(
+          initialCameraPosition: const CameraPosition(
+            target: LatLng(9.1099, 7.4042),
+            zoom: 11,
+          ),
+          mapType: MapType.normal,
+          zoomControlsEnabled: false,
+          myLocationButtonEnabled: true,
+          myLocationEnabled: true,
+          compassEnabled: false,
+          onMapCreated: _onMapCreated,
+        ),
+
+        _buildSearchBar(colorPalette),
+
+        _buildBottomLeftButtons(colorPalette),
+
+        _buildVariantsButton(colorPalette),
+
+        if(_showMarkers) _buildCustomMarkers(),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar(ColorPalette colorPalette) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                height: 50,
+                decoration: BoxDecoration(
+                  color: colorPalette.white,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Iconsax.search_normal_copy,
+                        size: 20,
+                        color: colorPalette.black.withOpacity(0.7)),
+                    const Gap(5),
+                    Text(
+                      "Saint Petersburg",
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: colorPalette.black.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const Gap(10),
+          ScaleTransition(
+            scale: _scaleAnimation,
+            child: Container(
+              height: 50,
+              width: 50,
+              decoration: BoxDecoration(
+                color: colorPalette.white,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: const Icon(Iconsax.arrow_2, size: 16,),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomLeftButtons(ColorPalette colorPalette) {
+    return Positioned(
+      bottom: 85,
+      left: 35,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ScaleTransition(
+            scale: _scaleAnimation,
+            child: Builder(
+              builder: (context) => RippleButton(
+                key: _markerKey,
+                icon: Container(
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Icon(
+                    getPropertyFilterIcon(selectedPropertyFilter),
+                    size: 20,
+                    color: colorPalette.white,
+                  ),
+                ),
+                onTap: () => _showOverlayOnTop(context),
+              ),
+            ),
+          ),
+          const Gap(8),
+          ScaleTransition(
+            scale: _scaleAnimation,
+            child: RippleButton(
+              icon: Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Transform.rotate(
+                  angle: 0.8,
+                  child: Icon(
+                    Iconsax.direct_up_copy,
+                    size: 20,
+                    color: colorPalette.white,
+                  ),
+                ),
+              ),
+              onTap: () {},
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVariantsButton(ColorPalette colorPalette) {
+    return Positioned(
+      bottom: 85,
+      right: 35,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          height: 50,
+          decoration: BoxDecoration(
+            color: colorPalette.darkGray.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Row(
+              children: [
+                Icon(
+                  Iconsax.textalign_left,
+                  size: 20,
+                  color: colorPalette.white,
+                ),
+                const Gap(8),
+                Text(
+                  "List of variants",
+                  style: GoogleFonts.manrope(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: colorPalette.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomMarkers() {
+    return Stack(
+      children: markerPositions.map((data) {
+        return Positioned(
+          left: data.position.dx,
+          top: data.position.dy,
+          child: CustomMarker(
+              model: data,
+              propertyFilter: selectedPropertyFilter
+          ),
+        );
+      }).toList(),
     );
   }
 }
