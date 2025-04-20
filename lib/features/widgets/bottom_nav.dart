@@ -50,10 +50,10 @@ class _BottomNavState extends State<BottomNav> {
             right: 0,
             bottom: 0,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 25), // Adjust this for desired position from bottom
+              padding: const EdgeInsets.only(bottom: 35),
               child: Container(
                 height: 66,
-                margin: EdgeInsets.symmetric(horizontal: 50),
+                margin: EdgeInsets.symmetric(horizontal: 80),
                 decoration: BoxDecoration(
                   color: ColorPalette().background,
                   borderRadius: BorderRadius.circular(40),
@@ -76,7 +76,7 @@ class _BottomNavState extends State<BottomNav> {
                         });
                       },
                       child: Container(
-                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        margin: EdgeInsets.symmetric(horizontal: 5),
                         decoration: BoxDecoration(
                           color: selectedNavIndex == index
                               ? ColorPalette().secondaryColor

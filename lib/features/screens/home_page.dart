@@ -67,7 +67,8 @@ class _HomePageState extends State<HomePage> {
                           width: 50,
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: ColorPalette().lightBrown
+                              color: ColorPalette().lightBrown,
+                            image: DecorationImage(image: AssetImage("assets/images/profile.png"))
                           ),
                         )
                       ],
