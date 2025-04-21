@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
       await Future.delayed(const Duration(milliseconds: 2000));
       _sheetController.animateTo(
-        0.68,
+        0.69,
         duration: Duration(milliseconds: 1000),
         curve: Curves.easeInOut,
       ).then((_) {
@@ -420,7 +420,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             controller: _sheetController,
             initialChildSize: 0,
             minChildSize: 0,
-            maxChildSize: 0.68,
+            maxChildSize: 0.69,
             snapSizes: [0.1, 0.41],
             snap: true,
             builder: (context, scrollController) {
