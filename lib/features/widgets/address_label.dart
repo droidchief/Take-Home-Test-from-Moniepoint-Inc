@@ -19,6 +19,7 @@ class _AddressLabelState extends State<AddressLabel> with SingleTickerProviderSt
   late AnimationController _mainController;
   late Animation<double> _widthAnimation;
   late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
 
   static const double _minWidth = 60;
 
@@ -30,10 +31,17 @@ class _AddressLabelState extends State<AddressLabel> with SingleTickerProviderSt
       duration: const Duration(milliseconds: 1500),
     );
 
+    _scaleAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _mainController,
+        curve: const Interval(0.0, 0.3, curve: Curves.easeOutCubic),
+      ),
+    );
+
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _mainController,
-        curve: const Interval(0.4, 0.5, curve: Curves.easeIn),
+        curve: const Interval(0.6, 0.8, curve: Curves.easeIn),
       ),
     );
   }
@@ -50,74 +58,77 @@ class _AddressLabelState extends State<AddressLabel> with SingleTickerProviderSt
         ).animate(
           CurvedAnimation(
             parent: _mainController,
-            curve: Curves.easeOut,
+            curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
           ),
         );
 
-        // Start animation after layout is built
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if(widget.startAddressAnimation) {
-            if (!_mainController.isAnimating && !_mainController.isCompleted) {
-              _mainController.forward();
-            }
+          if (widget.startAddressAnimation &&
+              !_mainController.isAnimating &&
+              !_mainController.isCompleted) {
+            _mainController.forward();
           }
-
         });
 
         return AnimatedBuilder(
-          animation: _widthAnimation,
+          animation: _mainController,
           builder: (context, child) {
-            return ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                child: Container(
-                  width: _widthAnimation.value,
-                  height: 60,
-                  padding: const EdgeInsets.only(right: 3, left: 10),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ColorPalette().darkBeige.withOpacity(0.85),
-                        ColorPalette().darkBeige.withOpacity(0.75),
-                      ],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 1.0,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    width: _widthAnimation.value,
+                    height: 60,
+                    padding: const EdgeInsets.only(right: 3),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          ColorPalette().darkBeige.withOpacity(0.85),
+                          ColorPalette().darkBeige.withOpacity(0.75),
+                        ],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
                       ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      Align(
-                        alignment: widget.isCenter ? Alignment.center : Alignment.centerLeft,
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: Text(
-                            widget.address,
-                            style: GoogleFonts.manrope(
-                              fontSize: widget.isCenter ? 16 : 14,
-                              fontWeight: FontWeight.w600,
-                              color: ColorPalette().black.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.2),
+                        width: 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        Align(
+                          alignment: widget.isCenter
+                              ? Alignment.center
+                              : Alignment.centerLeft,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: Text(
+                              widget.address,
+                              style: GoogleFonts.manrope(
+                                fontSize: widget.isCenter ? 16 : 14,
+                                fontWeight: FontWeight.w600,
+                                color: ColorPalette().black.withOpacity(0.8),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const Align(
-                        alignment: Alignment.centerRight,
-                        child: ArrowButton(),
-                      ),
-                    ],
+                        const Align(
+                          alignment: Alignment.centerRight,
+                          child: ArrowButton(),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
