@@ -45,8 +45,9 @@ class _BottomNavState extends State<BottomNav> with SingleTickerProviderStateMix
       curve: Curves.easeOut,
     ));
 
-    // Start the animation when widget is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Start the animation 6 seconds after when widget is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 6000));
       _animationController.forward();
     });
   }
