@@ -77,10 +77,11 @@ class _BottomNavState extends State<BottomNav>
             child: SlideTransition(
               position: _slideAnimation,
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 35),
+                padding: const EdgeInsets.only(bottom: 30),
                 child: Container(
                   height: 66,
                   margin: const EdgeInsets.symmetric(horizontal: 70),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
                     color: ColorPalette().background,
                     borderRadius: BorderRadius.circular(40),
