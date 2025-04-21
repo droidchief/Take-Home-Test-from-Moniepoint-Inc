@@ -113,12 +113,15 @@ class _AddressLabelState extends State<AddressLabel> with SingleTickerProviderSt
                               : Alignment.centerLeft,
                           child: FadeTransition(
                             opacity: _fadeAnimation,
-                            child: Text(
-                              widget.address,
-                              style: GoogleFonts.manrope(
-                                fontSize: widget.isCenter ? 16 : 14,
-                                fontWeight: FontWeight.w600,
-                                color: ColorPalette().black.withOpacity(0.8),
+                            child: Padding(
+                              padding: EdgeInsets.only(left: widget.isCenter ? 0 : 10),
+                              child: Text(
+                                widget.address,
+                                style: GoogleFonts.manrope(
+                                  fontSize: widget.isCenter ? 16 : 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: ColorPalette().black.withOpacity(0.8),
+                                ),
                               ),
                             ),
                           ),

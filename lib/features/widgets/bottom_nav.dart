@@ -15,7 +15,8 @@ class BottomNav extends StatefulWidget {
   State<BottomNav> createState() => _BottomNavState();
 }
 
-class _BottomNavState extends State<BottomNav> with SingleTickerProviderStateMixin {
+class _BottomNavState extends State<BottomNav>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
 
@@ -40,14 +41,13 @@ class _BottomNavState extends State<BottomNav> with SingleTickerProviderStateMix
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
 
-    // Start the animation 6 seconds after when widget is ready
+    // Start the animation 4.5 seconds after when widget is ready
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 6000));
+      await Future.delayed(const Duration(milliseconds: 4500));
       _animationController.forward();
     });
   }
@@ -92,43 +92,46 @@ class _BottomNavState extends State<BottomNav> with SingleTickerProviderStateMix
                     ],
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(
                       bottomNavItems.length,
-                          (index) => GestureDetector(
+                      (index) => GestureDetector(
                         onTap: () {
                           setState(() {
                             selectedNavIndex = index;
                           });
                         },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeInOut,
-                              height: 50,
-                              width: 50,
-                              margin: const EdgeInsets.symmetric(horizontal: 5),
-                              decoration: BoxDecoration(
-                                color: selectedNavIndex == index
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                          height: selectedNavIndex == index ? 50 : 40,
+                          width: selectedNavIndex == index ? 50 : 40,
+                          margin: const EdgeInsets.symmetric(horizontal: 0),
+                          decoration: BoxDecoration(
+                            color:
+                                selectedNavIndex == index
                                     ? ColorPalette().secondaryColor
                                     : ColorPalette().inActiveNavIcon,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 500),
-                                  transitionBuilder: (child, animation) =>
-                                      FadeTransition(opacity: animation, child: child),
-                                  child: Icon(
-                                    bottomNavItems[index].icon,
-                                    key: ValueKey<bool>(selectedNavIndex == index),
-                                    color: ColorPalette().white,
-                                    size: selectedNavIndex == index ? 24 : 20,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 500),
+                              transitionBuilder:
+                                  (child, animation) => FadeTransition(
+                                    opacity: animation,
+                                    child: child,
                                   ),
-                                ),
+                              child: Icon(
+                                bottomNavItems[index].icon,
+                                key: ValueKey<bool>(selectedNavIndex == index),
+                                color: ColorPalette().white,
+                                size: selectedNavIndex == index ? 24 : 20,
                               ),
                             ),
-
                           ),
+                        ),
+                      ),
                     ),
                   ),
                 ),

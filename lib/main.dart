@@ -12,16 +12,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ColorPalette();
+
     return MaterialApp(
       title: 'Monie Point Flutter Test',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        textTheme: GoogleFonts.manropeTextTheme(),
-        colorScheme: ColorScheme.fromSeed(seedColor: ColorPalette().black),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: palette.mapBackground,
+        textTheme: GoogleFonts.manropeTextTheme(
+          ThemeData.dark().textTheme,
+        ),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: palette.beige,
+          brightness: Brightness.dark,
+          background: palette.mapBackground,
+        ),
       ),
       home: BottomNav(),
     );
   }
 }
-

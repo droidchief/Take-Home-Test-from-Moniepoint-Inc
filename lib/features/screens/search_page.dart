@@ -338,7 +338,7 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
                 color: colorPalette.white,
                 borderRadius: BorderRadius.circular(30),
               ),
-              child: const Icon(Iconsax.arrow_2, size: 16,),
+              child: Icon(Iconsax.candle_2_copy, size: 16, color: colorPalette.black.withOpacity(0.7)),
             ),
           ),
         ],

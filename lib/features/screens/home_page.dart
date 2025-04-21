@@ -69,24 +69,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _welcomeTextFadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _mainController,
-        curve: const Interval(0.5, 0.6, curve: Curves.easeIn),
+        curve: const Interval(0.45, 0.55, curve: Curves.easeIn),
       ),
     );
 
     _welcomeTextSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, 2),
+      begin: const Offset(0, 0.5),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
         parent: _mainController,
-        curve: const Interval(0.5, 0.6, curve: Curves.easeOutCubic),
+        curve: const Interval(0.5, 0.65, curve: Curves.easeOutCubic),
       ),
     );
 
     _welcomeTextRevealAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _mainController,
-        curve: const Interval(0.5, 0.6, curve: Curves.easeOutCubic),
+        curve: const Interval(0.55, 0.7, curve: Curves.easeOutCubic),
       ),
     );
 
@@ -108,16 +108,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     WidgetsBinding.instance.addObserver(this);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _mainController.forward().then((_) {
-        _sheetController.animateTo(
-          0.40,
-          duration: Duration(milliseconds: 1000),
-          curve: Curves.easeInOut,
-        ).then((_) {
-          setState(() {
-            startAddressAnimation = true;
-          });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _mainController.forward();
+
+      await Future.delayed(const Duration(milliseconds: 2000));
+      _sheetController.animateTo(
+        0.68,
+        duration: Duration(milliseconds: 1000),
+        curve: Curves.easeInOut,
+      ).then((_) {
+        setState(() {
+          startAddressAnimation = true;
         });
       });
     });
@@ -272,14 +273,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 fontSize: 36,
                                 fontWeight: FontWeight.w500,
                                 color: ColorPalette().black,
-                                height: 0,
+                                height: 1.1, // Slightly higher for natural spacing
                               ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const Gap(40),
+                    const Gap(30),
 
                     // Dashboard cards
                     Row(
@@ -420,6 +421,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             initialChildSize: 0,
             minChildSize: 0,
             maxChildSize: 0.68,
+            snapSizes: [0.1, 0.41],
+            snap: true,
             builder: (context, scrollController) {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5),

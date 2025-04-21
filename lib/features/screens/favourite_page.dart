@@ -16,7 +16,7 @@ class FavouritePage extends StatelessWidget {
             style: GoogleFonts.manrope(
               fontSize: 32,
               fontWeight: FontWeight.w600,
-              color: ColorPalette().black.withOpacity(0.8),
+              color: ColorPalette().white.withOpacity(0.8),
             ),
           ),
         ),
