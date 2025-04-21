@@ -4,6 +4,7 @@ import 'package:monie_point_flutter_test/features/screens/home_page.dart';
 import 'package:monie_point_flutter_test/features/screens/profile_page.dart';
 import 'package:monie_point_flutter_test/features/screens/search_page.dart';
 import 'package:monie_point_flutter_test/features/theme/color_palette.dart';
+import 'package:monie_point_flutter_test/features/widgets/ripple_button.dart';
 
 import '../models/bottom_nav_model.dart';
 import '../screens/chats_page.dart';
@@ -95,33 +96,31 @@ class _BottomNavState extends State<BottomNav>
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(
                       bottomNavItems.length,
-                      (index) => GestureDetector(
+                          (index) => RippleButton(
                         onTap: () {
                           setState(() {
                             selectedNavIndex = index;
                           });
                         },
-                        child: AnimatedContainer(
+                        buttonSize: selectedNavIndex == index ? 50 : 40,
+                        icon: AnimatedContainer(
                           duration: const Duration(milliseconds: 500),
                           curve: Curves.easeInOut,
                           height: selectedNavIndex == index ? 50 : 40,
                           width: selectedNavIndex == index ? 50 : 40,
-                          margin: const EdgeInsets.symmetric(horizontal: 0),
                           decoration: BoxDecoration(
-                            color:
-                                selectedNavIndex == index
-                                    ? ColorPalette().secondaryColor
-                                    : ColorPalette().inActiveNavIcon,
+                            color: selectedNavIndex == index
+                                ? ColorPalette().secondaryColor
+                                : ColorPalette().inActiveNavIcon,
                             shape: BoxShape.circle,
                           ),
                           child: Center(
                             child: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 500),
-                              transitionBuilder:
-                                  (child, animation) => FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  ),
+                              transitionBuilder: (child, animation) => FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
                               child: Icon(
                                 bottomNavItems[index].icon,
                                 key: ValueKey<bool>(selectedNavIndex == index),
@@ -132,6 +131,7 @@ class _BottomNavState extends State<BottomNav>
                           ),
                         ),
                       ),
+
                     ),
                   ),
                 ),
