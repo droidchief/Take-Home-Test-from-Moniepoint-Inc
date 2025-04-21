@@ -7,6 +7,7 @@ class PropertyCard extends StatelessWidget {
   final String address;
   final double height;
   final bool isAddressCenter;
+  final bool startAddressAnimation;
 
 
   const PropertyCard({
@@ -14,6 +15,7 @@ class PropertyCard extends StatelessWidget {
     required this.imageAsset,
     required this.address,
     required this.height,
+    required this.startAddressAnimation,
     this.isAddressCenter = false,
   });
 
@@ -32,8 +34,8 @@ class PropertyCard extends StatelessWidget {
       child: Stack(
         children: [
           Align(
-            alignment: Alignment.bottomCenter,
-            child: AddressLabel(address: address, isCenter: isAddressCenter,),
+            alignment: Alignment.bottomLeft,
+            child: AddressLabel(address: address, isCenter: isAddressCenter, startAddressAnimation: startAddressAnimation,),
           ),
         ],
       ),

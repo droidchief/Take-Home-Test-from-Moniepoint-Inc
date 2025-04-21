@@ -32,6 +32,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   // Property sheet controller
   final DraggableScrollableController _sheetController = DraggableScrollableController();
+  bool startAddressAnimation = false;
 
   @override
   void initState() {
@@ -110,10 +111,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _mainController.forward().then((_) {
         _sheetController.animateTo(
-          0.68,
+          0.40,
           duration: Duration(milliseconds: 1000),
           curve: Curves.easeInOut,
-        );
+        ).then((_) {
+          setState(() {
+            startAddressAnimation = true;
+          });
+        });
       });
     });
   }
@@ -428,12 +433,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 child: ListView(
                   padding: const EdgeInsets.only(top: 8),
                   controller: scrollController,
-                  children: const [
+                  children: [
                     PropertyCard(
                       imageAsset: "assets/images/random_image_1.jpg",
                       address: "Gladkova St., 25",
                       height: 250,
                       isAddressCenter: true,
+                      startAddressAnimation: startAddressAnimation,
                     ),
                     Gap(10),
 
@@ -445,6 +451,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             imageAsset: "assets/images/random_image_2.jpg",
                             address: "Gubina St., 11",
                             height: 360,
+                            startAddressAnimation: startAddressAnimation,
                           ),
                         ),
                         Gap(10),
@@ -456,12 +463,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 imageAsset: "assets/images/random_image_3.jpg",
                                 address: "Trefoleva St., 43",
                                 height: 175,
+                                startAddressAnimation: startAddressAnimation,
                               ),
                               Gap(10),
                               PropertyCard(
                                 imageAsset: "assets/images/random_image_4.jpg",
                                 address: "Sedova St., 22",
                                 height: 175,
+                                startAddressAnimation: startAddressAnimation,
                               ),
                             ],
                           ),
